@@ -15,20 +15,41 @@ const commands = [
     .setName("flood")
     .setDescription("Send messages with Willy emblem")
     .setDMPermission(true)
-    .addStringOption(function(o) {
-      return o.setName("message").setDescription("Message to send").setRequired(true);
-    })
-    .addIntegerOption(function(o) {
-      return o.setName("count").setDescription("Number of times to send (1-16)").setMinValue(1).setMaxValue(16);
-    }),
+    .addStringOption(o =>
+      o.setName("message")
+        .setDescription("Message to send")
+        .setRequired(true)
+    )
+    .addIntegerOption(o =>
+      o.setName("count")
+        .setDescription("Number of times to send (1-16)")
+        .setMinValue(1)
+        .setMaxValue(16)
+    ),
+
+  new SlashCommandBuilder()
+    .setName("ping")
+    .setDescription("Check if bot is alive")
+    .setDMPermission(true)
+
+].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
 
-(async function() {
+(async () => {
   try {
-    await rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: commands });
+    await rest.put(
+      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+      { body: commands }
+    );
+
     console.log("Guild commands registered!");
-    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands });
+
+    await rest.put(
+      Routes.applicationCommands(CLIENT_ID),
+      { body: commands }
+    );
+
     console.log("Global commands registered!");
   } catch (err) {
     console.error("Failed to register commands:", err);
@@ -45,22 +66,27 @@ const client = new Client({
   partials: [Partials.Channel],
 });
 
-client.once(Events.ClientReady, function() {
+client.once(Events.ClientReady, () => {
   console.log("Bot is online as " + client.user.tag);
+
   const statuses = [
     { name: "Willy Taking Over", type: 0 },
     { name: "Willy is better", type: 2 },
     { name: "You a bitch nigga", type: 3 },
     { name: "Come Die", type: 5 },
   ];
+
   let i = 0;
-  setInterval(function() {
-    client.user.setPresence({ activities: [statuses[i]], status: "online" });
+  setInterval(() => {
+    client.user.setPresence({
+      activities: [statuses[i]],
+      status: "online"
+    });
     i = (i + 1) % statuses.length;
   }, 10000);
 });
 
-client.login(TOKEN).catch(function(err) {
+client.login(TOKEN).catch(err => {
   console.error("Login failed:", err);
   process.exit(1);
 });
