@@ -1,34 +1,23 @@
-if (interaction.commandName === "flood") {
-  const message = interaction.options.getString("message");
-  const count = interaction.options.getInteger("count") || 1;
+const message = interaction.options.getString("message");
+const count = interaction.options.getInteger("count") || 1;
 
-  const embed = new EmbedBuilder()
-    .setTitle("Spam Panel")
-    .setDescription(
-      `**Message:** ${message}\n` +
-      `🔁 **Count:** ${count}`
-    )
-    .setColor(0xff0000);
+// ✅ SAFE CHANNEL FETCH
+const channel = interaction.channel 
+  || await interaction.client.channels.fetch(interaction.channelId);
 
-  const row = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId("spam_1")
-      .setLabel("Spam x1")
-      .setStyle(ButtonStyle.Danger),
-
-    new ButtonBuilder()
-      .setCustomId("spam_10")
-      .setLabel("Spam x10")
-      .setStyle(ButtonStyle.Primary),
-
-    new ButtonBuilder()
-      .setCustomId("spam_16")
-      .setLabel("Spam x16")
-      .setStyle(ButtonStyle.Success),
-  );
-
+if (!channel) {
   return interaction.reply({
-    embeds: [embed],
-    components: [row]
+    content: "Cannot access this channel.",
+    flags: 64
   });
 }
+
+// ✅ SAFE SEND LOOP
+for (let i = 0; i < count; i++) {
+  await channel.send(message);
+}
+
+return interaction.reply({
+  content: `Sent ${count} messages!`,
+  flags: 64
+});
