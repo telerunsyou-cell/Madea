@@ -13,7 +13,7 @@ if (!TOKEN || !CLIENT_ID || !GUILD_ID) {
 const commands = [
   new SlashCommandBuilder()
     .setName("flood")
-    .setDescription("Send messages with Madea emblem")
+    .setDescription("Send messages with Willy emblem")
     .setDMPermission(true)
     .addStringOption(function(o) {
       return o.setName("message").setDescription("Message to send").setRequired(true);
@@ -53,8 +53,8 @@ const client = new Client({
 client.once(Events.ClientReady, function() {
   console.log("Bot is online as " + client.user.tag);
   const statuses = [
-    { name: "Madea Taking Over", type: 0 },
-    { name: "Textin Yo Ho", type: 2 },
+    { name: "Willy Taking Over", type: 0 },
+    { name: "Willy is better", type: 2 },
     { name: "You a bitch nigga", type: 3 },
     { name: "Come Die", type: 5 },
   ];
