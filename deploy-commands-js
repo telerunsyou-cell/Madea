@@ -13,7 +13,7 @@ if (!TOKEN || !CLIENT_ID || !GUILD_ID) {
 const commands = [
   new SlashCommandBuilder()
     .setName('flood')
-    .setDescription('Send messages with Madea')
+    .setDescription('Send messages with Willy')
     .addStringOption(o =>
       o.setName('message')
         .setDescription('Message to send')
