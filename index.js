@@ -21,11 +21,6 @@ const commands = [
     .addIntegerOption(function(o) {
       return o.setName("count").setDescription("Number of times to send (1-16)").setMinValue(1).setMaxValue(16);
     }),
-  new SlashCommandBuilder()
-    .setName("ping")
-    .setDescription("Check if bot is alive")
-    .setDMPermission(true),
-].map(function(cmd) { return cmd.toJSON(); });
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
 
