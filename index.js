@@ -1,10 +1,16 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, Events, REST, Routes, SlashCommandBuilder, Partials } = require('discord.js');
+const {
+  Client,
+  GatewayIntentBits,
+  Events,
+  REST,
+  Routes,
+  SlashCommandBuilder,
+  Partials
+} = require('discord.js');
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
-
-// ❌ REMOVE GUILD_ID (not needed for global commands)
 
 if (!TOKEN || !CLIENT_ID) {
   console.error("ERROR: Missing TOKEN or CLIENT_ID.");
@@ -52,13 +58,31 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
 })();
 
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.DirectMessages,
-  ],
+  intents: [GatewayIntentBits.Guilds],
   partials: [Partials.Channel],
+});
+
+// ✅ THIS IS WHAT YOU WERE MISSING
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === "ping") {
+    return interaction.reply("Bot is alive!");
+  }
+
+  if (interaction.commandName === "flood") {
+    const message = interaction.options.getString("message");
+    const count = interaction.options.getInteger("count") || 1;
+
+    for (let i = 0; i < count; i++) {
+      await interaction.channel.send(message + " [Willy]");
+    }
+
+    return interaction.reply({
+      content: "Done sending messages!",
+      ephemeral: true
+    });
+  }
 });
 
 client.once(Events.ClientReady, () => {
