@@ -3,10 +3,11 @@ const { Client, GatewayIntentBits, Events, REST, Routes, SlashCommandBuilder, Pa
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
-const GUILD_ID = process.env.GUILD_ID;
 
-if (!TOKEN || !CLIENT_ID || !GUILD_ID) {
-  console.error("ERROR: Missing TOKEN, CLIENT_ID, or GUILD_ID.");
+// ❌ REMOVE GUILD_ID (not needed for global commands)
+
+if (!TOKEN || !CLIENT_ID) {
+  console.error("ERROR: Missing TOKEN or CLIENT_ID.");
   process.exit(1);
 }
 
@@ -14,7 +15,6 @@ const commands = [
   new SlashCommandBuilder()
     .setName("flood")
     .setDescription("Send messages with Willy emblem")
-    .setDMPermission(true)
     .addStringOption(o =>
       o.setName("message")
         .setDescription("Message to send")
@@ -30,7 +30,6 @@ const commands = [
   new SlashCommandBuilder()
     .setName("ping")
     .setDescription("Check if bot is alive")
-    .setDMPermission(true)
 
 ].map(cmd => cmd.toJSON());
 
@@ -38,12 +37,7 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
 
 (async () => {
   try {
-    await rest.put(
-      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-      { body: commands }
-    );
-
-    console.log("Guild commands registered!");
+    console.log("Registering GLOBAL commands...");
 
     await rest.put(
       Routes.applicationCommands(CLIENT_ID),
@@ -52,7 +46,8 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
 
     console.log("Global commands registered!");
   } catch (err) {
-    console.error("Failed to register commands:", err);
+    console.error("Command registration failed:");
+    console.error(err);
   }
 })();
 
@@ -68,22 +63,6 @@ const client = new Client({
 
 client.once(Events.ClientReady, () => {
   console.log("Bot is online as " + client.user.tag);
-
-  const statuses = [
-    { name: "Willy Taking Over", type: 0 },
-    { name: "Willy is better", type: 2 },
-    { name: "You a bitch nigga", type: 3 },
-    { name: "Come Die", type: 5 },
-  ];
-
-  let i = 0;
-  setInterval(() => {
-    client.user.setPresence({
-      activities: [statuses[i]],
-      status: "online"
-    });
-    i = (i + 1) % statuses.length;
-  }, 10000);
 });
 
 client.login(TOKEN).catch(err => {
