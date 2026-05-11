@@ -1,29 +1,34 @@
-const { MessageFlags } = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
-  name: "flood",
+  data: new SlashCommandBuilder()
+    .setName("spam")
+    .setDescription("spam for training")
+    .addIntegerOption(option =>
+      option
+        .setName("amount")
+        .setDescription("Number of spammed messages (max 16)")
+        .setRequired(true)
+    ),
 
   async execute(interaction) {
-    const message = interaction.options.getString("message");
-    const count = interaction.options.getInteger("count") || 1;
+    const amount = Math.min(
+      interaction.options.getInteger("amount"),
+      5
+    );
 
-    // Reply first so interaction doesn't fail
     await interaction.reply({
-      content: "Sending messages...",
-      flags: MessageFlags.Ephemeral
+      content: "⚠️ spam activity for training...",
+      ephemeral: true
     });
 
-    try {
-      for (let i = 0; i < count; i++) {
-        await interaction.channel.send(`${message} [Willy]`);
-      }
-    } catch (err) {
-      console.error("Flood command error:", err);
+    for (let i = 1; i <= amount; i++) {
+      await interaction.channel.send(
+        `🚨 [TRAINING SPAM TEST ${i}] Example suspicious message`
+      );
 
-      await interaction.followUp({
-        content: "Could not send messages. Check bot permissions.",
-        flags: MessageFlags.Ephemeral
-      });
+      // delay so it doesn't flood
+      await new Promise(resolve => setTimeout(resolve, 1500));
     }
   }
 };
