@@ -23,7 +23,7 @@ if (!TOKEN || !CLIENT_ID) {
 const commands = [
   new SlashCommandBuilder()
     .setName("flood")
-    .setDescription("Send messages with Willy emblem")
+    .setDescription("Send messages with Willy")
     .addStringOption(o =>
       o.setName("message")
         .setDescription("Message to send")
@@ -31,16 +31,11 @@ const commands = [
     )
     .addIntegerOption(o =>
       o.setName("count")
-        .setDescription("Number of times to send (1-16)")
+        .setDescription("Number of times to send (1-25)")
         .setMinValue(1)
         .setMaxValue(16)
     ),
 
-  new SlashCommandBuilder()
-    .setName("ping")
-    .setDescription("Check if bot is alive")
-
-].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
 
@@ -68,10 +63,6 @@ const client = new Client({
 // ✅ THIS IS WHAT YOU WERE MISSING
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-
-  if (interaction.commandName === "ping") {
-    return interaction.reply("Bot is alive!");
-  }
 
   if (interaction.commandName === "flood") {
     const message = interaction.options.getString("message");
