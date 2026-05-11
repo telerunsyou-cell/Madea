@@ -1,89 +1,54 @@
-process.on("unhandledRejection", console.error);
-process.on("uncaughtException", console.error);
+require("dotenv").config();
 
-require('dotenv').config();
+const fs = require("fs");
+const path = require("path");
+
 const {
   Client,
   GatewayIntentBits,
   Events,
-  REST,
-  Routes,
-  SlashCommandBuilder,
-  Partials
-} = require('discord.js');
-
-const TOKEN = process.env.TOKEN;
-const CLIENT_ID = process.env.CLIENT_ID;
-
-if (!TOKEN || !CLIENT_ID) {
-  console.error("ERROR: Missing TOKEN or CLIENT_ID.");
-  process.exit(1);
-}
-
-const commands = [
-  new SlashCommandBuilder()
-    .setName("flood")
-    .setDescription("Send messages with Willy")
-    .addStringOption(o =>
-      o.setName("message")
-        .setDescription("Message to send")
-        .setRequired(true)
-    )
-    .addIntegerOption(o =>
-      o.setName("count")
-        .setDescription("Number of times to send (1-25)")
-        .setMinValue(1)
-        .setMaxValue(16)
-    ),
-
-
-const rest = new REST({ version: "10" }).setToken(TOKEN);
-
-(async () => {
-  try {
-    console.log("Registering GLOBAL commands...");
-
-    await rest.put(
-      Routes.applicationCommands(CLIENT_ID),
-      { body: commands }
-    );
-
-    console.log("Global commands registered!");
-  } catch (err) {
-    console.error("Command registration failed:");
-    console.error(err);
-  }
-})();
+  Collection
+} = require("discord.js");
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
-  partials: [Partials.Channel],
+  intents: [GatewayIntentBits.Guilds]
 });
 
-// ✅ THIS IS WHAT YOU WERE MISSING
-client.on(Events.InteractionCreate, async (interaction) => {
+client.commands = new Collection();
+
+// Load commands
+const commandsPath = path.join(__dirname, "commands");
+const commandFiles = fs
+  .readdirSync(commandsPath)
+  .filter(file => file.endsWith(".js"));
+
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  client.commands.set(command.name, command);
+}
+
+client.once(Events.ClientReady, c => {
+  console.log(`Bot online as ${c.user.tag}`);
+});
+
+client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === "flood") {
-    const message = interaction.options.getString("message");
-    const count = interaction.options.getInteger("count") || 1;
+  const command = client.commands.get(interaction.commandName);
+  if (!command) return;
 
-    for (let i = 0; i < count; i++) {
-      await interaction.channel.send(message + " [Willy]");
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+
+    if (!interaction.replied) {
+      await interaction.reply({
+        content: "There was an error running this command.",
+        ephemeral: true
+      });
     }
-
-    return interaction.reply({
-      content: "Done sending messages!",
-      ephemeral: true
-    });
   }
 });
 
-client.once(Events.ClientReady, () => {
-  console.log("Bot is online as " + client.user.tag);
-});
-
-client.login(TOKEN).catch(err => {
-  console.error("Login failed:", err);
-  process.exit(1);
-});
+client.login(process.env.TOKEN);
