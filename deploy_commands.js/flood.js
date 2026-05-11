@@ -1,23 +1,17 @@
-const message = interaction.options.getString("message");
-const count = interaction.options.getInteger("count") || 1;
+module.exports = {
+  name: "flood",
 
-// ✅ SAFE CHANNEL FETCH
-const channel = interaction.channel 
-  || await interaction.client.channels.fetch(interaction.channelId);
+  async execute(interaction) {
+    const message = interaction.options.getString("message");
+    const count = interaction.options.getInteger("count") || 1;
 
-if (!channel) {
-  return interaction.reply({
-    content: "Cannot access this channel.",
-    flags: 64
-  });
-}
+    await interaction.reply({
+      content: "Sending messages...",
+      ephemeral: true
+    });
 
-// ✅ SAFE SEND LOOP
-for (let i = 0; i < count; i++) {
-  await channel.send(message);
-}
-
-return interaction.reply({
-  content: `Sent ${count} messages!`,
-  flags: 64
-});
+    for (let i = 0; i < count; i++) {
+      await interaction.channel.send(`${message} [Willy]`);
+    }
+  }
+};
