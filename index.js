@@ -1,54 +1,35 @@
-require("dotenv").config();
-
-const fs = require("fs");
-const path = require("path");
-
-const {
-  Client,
-  GatewayIntentBits,
-  Events,
-  Collection
-} = require("discord.js");
-
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds]
-});
-
-client.commands = new Collection();
-
-// Load commands
-const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs
-  .readdirSync(commandsPath)
-  .filter(file => file.endsWith(".js"));
-
-for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
-  client.commands.set(command.name, command);
-}
-
-client.once(Events.ClientReady, c => {
-  console.log(`Bot online as ${c.user.tag}`);
-});
-
-client.on(Events.InteractionCreate, async interaction => {
+client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
-  if (!command) return;
+
+  if (!command) {
+    console.log(`No command found: ${interaction.commandName}`);
+    return;
+  }
 
   try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
+    console.log(`Running command: ${interaction.commandName}`);
 
-    if (!interaction.replied) {
-      await interaction.reply({
-        content: "There was an error running this command.",
-        ephemeral: true
-      });
+    await command.execute(interaction);
+
+  } catch (error) {
+    console.error("Command error:", error);
+
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({
+          content: "There was an error running this command.",
+          ephemeral: true,
+        });
+      } else {
+        await interaction.reply({
+          content: "There was an error running this command.",
+          ephemeral: true,
+        });
+      }
+    } catch (err) {
+      console.error("Reply error:", err);
     }
   }
 });
-
-client.login(process.env.TOKEN);
