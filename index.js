@@ -1,57 +1,59 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits } = require("discord.js");
+const { Client, GatewayIntentBits, Collection } = require("discord.js");
 
-// 1. CREATE CLIENT FIRST
+// ✅ Create client
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds
-  ]
+  intents: [GatewayIntentBits.Guilds],
 });
 
-// 2. COMMAND COLLECTION (IMPORTANT if you're using client.commands)
-client.commands = new Map();
+// ✅ Command collection
+client.commands = new Collection();
 
-// 3. EVENT
+/*
+  TEMP TEST COMMAND (so your bot works immediately)
+  You can replace this later with a folder system
+*/
+client.commands.set("ping", {
+  execute: async (interaction) => {
+    await interaction.reply("Pong 🏓");
+  },
+});
+
+// ✅ Interaction handler
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
 
   if (!command) {
-    console.log(`No command found: ${interaction.commandName}`);
+    console.log(`❌ No command found: ${interaction.commandName}`);
     return;
   }
 
   try {
-    console.log(`Running command: ${interaction.commandName}`);
-
+    console.log(`▶ Running command: ${interaction.commandName}`);
     await command.execute(interaction);
-
   } catch (error) {
-    console.error("Command error:", error);
+    console.error("❌ Command error:", error);
+
+    const msg = "There was an error running this command.";
 
     try {
       if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({
-          content: "There was an error running this command.",
-          ephemeral: true,
-        });
+        await interaction.followUp({ content: msg, ephemeral: true });
       } else {
-        await interaction.reply({
-          content: "There was an error running this command.",
-          ephemeral: true,
-        });
+        await interaction.reply({ content: msg, ephemeral: true });
       }
     } catch (err) {
-      console.error("Reply error:", err);
+      console.error("❌ Reply error:", err);
     }
   }
 });
 
-// 4. READY EVENT
+// ✅ Bot ready
 client.once("ready", () => {
-  console.log(`Logged in as ${client.user.tag}`);
+  console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
-// 5. LOGIN LAST
+// ✅ Login
 client.login(process.env.TOKEN);
