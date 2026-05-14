@@ -1,3 +1,14 @@
+require("dotenv").config();
+const { Client, GatewayIntentBits, Collection } = require("discord.js");
+
+// 1. CREATE CLIENT FIRST
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds],
+});
+
+// 2. NOW you can attach things to it
+client.commands = new Collection();
+
 const fs = require("fs");
 const path = require("path");
 
