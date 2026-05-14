@@ -1,19 +1,18 @@
 require("dotenv").config();
+
+const fs = require("fs");
+const path = require("path");
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
 
-// 1. CREATE CLIENT FIRST
+// ✅ CREATE CLIENT (ONLY ONCE)
 const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
-// 2. NOW you can attach things to it
+// ✅ COMMAND COLLECTION (ONLY ONE)
 client.commands = new Collection();
 
-const fs = require("fs");
-const path = require("path");
-
-client.commands = new Map();
-
+// ✅ LOAD COMMANDS
 const commandFiles = fs
   .readdirSync(path.join(__dirname, "commands"))
   .filter(file => file.endsWith(".js"));
@@ -23,28 +22,7 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-require("dotenv").config();
-const { Client, GatewayIntentBits, Collection } = require("discord.js");
-
-// ✅ Create client
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
-});
-
-// ✅ Command collection
-client.commands = new Collection();
-
-/*
-  TEMP TEST COMMAND (so your bot works immediately)
-  You can replace this later with a folder system
-*/
-client.commands.set("ping", {
-  execute: async (interaction) => {
-    await interaction.reply("Pong 🏓");
-  },
-});
-
-// ✅ Interaction handler
+// ✅ INTERACTION HANDLER
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -75,10 +53,10 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-// ✅ Bot ready
+// ✅ READY EVENT
 client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
-// ✅ Login
+// ✅ LOGIN
 client.login(process.env.TOKEN);
