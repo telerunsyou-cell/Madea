@@ -1,3 +1,17 @@
+require("dotenv").config();
+const { Client, GatewayIntentBits } = require("discord.js");
+
+// 1. CREATE CLIENT FIRST
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds
+  ]
+});
+
+// 2. COMMAND COLLECTION (IMPORTANT if you're using client.commands)
+client.commands = new Map();
+
+// 3. EVENT
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -33,3 +47,11 @@ client.on("interactionCreate", async (interaction) => {
     }
   }
 });
+
+// 4. READY EVENT
+client.once("ready", () => {
+  console.log(`Logged in as ${client.user.tag}`);
+});
+
+// 5. LOGIN LAST
+client.login(process.env.TOKEN);
